@@ -1,0 +1,20 @@
+Metadata-Version: 1.1
+Name: bvv-utils
+Version: 0.0.1
+Summary: Useful utils for Kaggle image processing competitions
+Home-page: https://github.com/Belobragin/bvv_utils
+Author: Belobragin Vladimir
+Author-email: vblvbl133@gmail.com
+License: Apache License Version 2.0
+Description: Python utilites for Kaggle image processing competitions, no further description
+Keywords: BVV
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Topic :: Utilities
+Classifier: Intended Audience :: BV private
+Classifier: Intended Audience :: Kaggle BV projects
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: Centos7
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8 - ?

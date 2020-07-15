@@ -1,0 +1,7 @@
+tensorflow>=2.0.0, <= 2.2.0 # TF
+opencv-python>=4.2.0 # CV2
+imgaug>=0.4.0 # IA
+numpy # NP
+pandas # PD
+resource # RS
+

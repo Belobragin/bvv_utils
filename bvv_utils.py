@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[ ]:
+
+
+VERSION = "0.0.4"
+version = VERSION
+__version__ = VERSION
+
+
 # In[1]:
 
 
@@ -321,7 +329,7 @@ def classic_val_datagen(fromfFoldValid,
         class_mode='categorical')
 
 
-# In[11]:
+# In[1]:
 
 
 import os

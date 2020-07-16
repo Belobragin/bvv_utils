@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[1]:
 
 
 VERSION = "0.0.5"
@@ -9,7 +9,7 @@ version = VERSION
 __version__ = VERSION
 
 
-# In[1]:
+# In[2]:
 
 
 import os, sys, json, resource
@@ -19,14 +19,14 @@ from random import shuffle
 import cv2
 
 
-# In[2]:
+# In[3]:
 
 
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
-# In[3]:
+# In[4]:
 
 
 from imgaug import augmenters as iaa
@@ -34,7 +34,7 @@ import imgaug as ia
 ia.seed(1)
 
 
-# In[4]:
+# In[5]:
 
 
 def getmem():
@@ -43,21 +43,21 @@ def getmem():
     )
 
 
-# In[5]:
+# In[6]:
 
 
 def get_id_from_file_path(file_path):
     return file_path.split(os.path.sep)[-1].replace('.png', '')
 
 
-# In[6]:
+# In[7]:
 
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 
-# In[7]:
+# In[8]:
 
 
 def MultiClass(seq_proc):
@@ -93,7 +93,7 @@ def MultiClass(seq_proc):
     return wrapper
 
 
-# In[ ]:
+# In[9]:
 
 
 def LinRegr(seq_proc):
@@ -129,7 +129,7 @@ def LinRegr(seq_proc):
     return wrapper
 
 
-# In[8]:
+# In[10]:
 
 
 #light augmenter, linear regression
@@ -172,7 +172,7 @@ def LightImgAugDataGeneratorLR(list_files,
     ], random_order=True) # apply augmenters in random order
 
 
-# In[ ]:
+# In[11]:
 
 
 #light augmenter, multiclass
@@ -215,7 +215,7 @@ def LightImgAugDataGeneratorMC(list_files,
     ], random_order=True) # apply augmenters in random order
 
 
-# In[ ]:
+# In[12]:
 
 
 #deep augmenter
@@ -226,6 +226,7 @@ def DeepImgAugDataGeneratorLR(list_files,
         augment=False,
         shuf = False):
     
+    sometimes = lambda aug: iaa.Sometimes(0.5, aug)
     return iaa.Sequential(
     [
         #
@@ -362,7 +363,7 @@ def DeepImgAugDataGeneratorLR(list_files,
 )
 
 
-# In[9]:
+# In[13]:
 
 
 #deep augmenter
@@ -373,6 +374,7 @@ def DeepImgAugDataGeneratorMC(list_files,
         augment=False,
         shuf = False):
     
+    sometimes = lambda aug: iaa.Sometimes(0.5, aug)
     return iaa.Sequential(
     [
         #
@@ -509,7 +511,7 @@ def DeepImgAugDataGeneratorMC(list_files,
 )
 
 
-# In[10]:
+# In[14]:
 
 
 def classic_train_datagen(fromfFoldTrain,

@@ -4,7 +4,7 @@
 # In[1]:
 
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"
 version = VERSION
 __version__ = VERSION
 
@@ -46,8 +46,11 @@ def getmem():
 # In[6]:
 
 
-def get_id_from_file_path(file_path):
-    return file_path.split(os.path.sep)[-1].replace('.png', '')
+def get_id_from_file_path(file_path, suffix_ = False):
+    if suffix_: 
+        return file_path.split(os.path.sep)[-2] + '/' + file_path.split(os.path.sep)[-1].replace('.png', '')
+    else:
+        return file_path.split(os.path.sep)[-1].replace('.png', '')
 
 
 # In[7]:
@@ -65,6 +68,7 @@ def MultiClass(seq_proc):
                 id_label_map, 
                 batch_size,
                 depth,
+                suffix = False,
                 augment=False,
                 shuf = False):
         X = np.full(batch_size, 0).astype(float)
@@ -73,7 +77,7 @@ def MultiClass(seq_proc):
             for batch in chunker(list_files, batch_size):
                 for i, x in enumerate(batch):                    
                     image= cv2.imread(x)
-                    yy = id_label_map[get_id_from_file_path(x)]
+                    yy = id_label_map[get_id_from_file_path(x, suffix_ = suffix)]
                     if i == 0:
                         X = np.expand_dims(np.array(image, dtype= 'uint8'), axis= 0)
                         Y = np.expand_dims(np.array(yy, dtype= 'uint8'), axis= 0)
@@ -544,7 +548,7 @@ def classic_val_datagen(fromfFoldValid,
                         image_sizey_,
                         image_sizex_,
                         batch_size_,
-                        shuffle_ = True,
+                        shuffle_ = False,
                         ):
     
     simple_generator = ImageDataGenerator(rescale=1/255.0)
@@ -557,7 +561,7 @@ def classic_val_datagen(fromfFoldValid,
         class_mode='categorical')
 
 
-# In[1]:
+# In[17]:
 
 
 import os

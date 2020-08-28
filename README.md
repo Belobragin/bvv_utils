@@ -1,18 +1,19 @@
-# BelobraginVV utilites for kaggle competitions
+## BelobraginVV utilites for kaggle competitions
 
-## Installation
+### Installation
 
-#From source:
-#
-#```
-#git clone --recursive https://github.com/Belobragin/bvv_utils.git
-#python setup.py install
-#pip install git+https://github.com/Belobragin/bvv_utils.git
-#```
+From source:
+
+```
+git clone --recursive https://github.com/Belobragin/bvv_utils.git
+python setup.py install
+pip3 install git+https://github.com/Belobragin/bvv_utils.git
+```
+  
 
 Locally:
 
 ```
-pip install bvv_utils
+pip3 install bvv_utils
 ```
 

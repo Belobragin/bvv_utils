@@ -1,2 +1,10 @@
 .ipynb*
+*.ipynb
+**/*.ipynb
+__py*
+**/__py*
+__pycache__
+tor_api_confi*
+tor_log*
+temp/
 

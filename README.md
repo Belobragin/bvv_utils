@@ -6,7 +6,7 @@ From source:
 
 ```
 git clone --recursive https://github.com/Belobragin/bvv_utils.git
-python setup.py install
+python3 setup.py install
 pip3 install git+https://github.com/Belobragin/bvv_utils.git
 ```
   

@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/bvv_utils/goutils/util"
+	"github.com/belobragin/bvv_utils/goutils/util"
 	"github.com/google/uuid"
 )
 

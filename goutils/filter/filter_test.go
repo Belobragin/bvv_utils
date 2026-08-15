@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 )
 
 func Test_StandardFilterParse(t *testing.T) {

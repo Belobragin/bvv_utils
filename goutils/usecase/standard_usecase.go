@@ -1,15 +1,17 @@
 package usecase
 
 import (
-	"database/sql"
+	"github.com/belobragin/bvv_utils/goutils/config"
+	"github.com/belobragin/bvv_utils/goutils/database"
 
 	"go.uber.org/zap"
 )
 
 type StandardUseCaseI interface {
-	GetDb() *sql.DB
+	GetDb() *database.ProjectPsqlDb
 	GetLog() *zap.Logger
-	GetPort() string
+	GetApiPort() string
+	GetMetricPort() string
 	GetServiceName() string
 	GetUseCors() bool
 	GetAllowOrigin() string
@@ -20,52 +22,73 @@ type StandardUseCaseI interface {
 }
 
 type StandardUseCaseRealization struct {
-	Log         *zap.Logger
-	Db          *sql.DB
-	ErrC        chan error
+	log         *zap.Logger
+	db          *database.ProjectPsqlDb
+	errC        chan error
 	ServiceName string
-	Port        string
-	AllStopChan chan struct{}
+	apiPort     string
+	allStopChan chan struct{}
 }
 
-func (s *StandardUseCaseRealization) GetDb() *sql.DB {
-	return s.Db
+func (s *StandardUseCaseRealization) GetDb() *database.ProjectPsqlDb {
+	return s.db
 }
 
 func (s *StandardUseCaseRealization) GetLog() *zap.Logger {
-	return s.Log
+	return s.log
 }
 
 func (s *StandardUseCaseRealization) ErrCh() chan error {
-	return s.ErrC
+	return s.errC
 }
 
 func (s *StandardUseCaseRealization) GetServiceName() string {
 	return s.ServiceName
 }
 
-func (s *StandardUseCaseRealization) GetPort() string {
-	return s.Port
+func (s *StandardUseCaseRealization) GetApiPort() string {
+	return s.apiPort
 }
 
 func (s *StandardUseCaseRealization) GetAllStopChan() chan struct{} {
-	return s.AllStopChan
+	return s.allStopChan
+}
+
+func (u *StandardUseCaseRealization) NewStandardUseCase(
+	c config.StandardConfigI,
+	l *zap.Logger,
+	ec chan error,
+) error {
+	u.log = l
+	u.errC = ec
+	u.apiPort = c.GetApiPort()
+	u.allStopChan = make(chan struct{}, 1)
+	return nil
 }
 
 type StandardCorsRealization struct {
-	UseCors     bool
-	AllowOrigin string
-	MaxAge      int
+	useCors     bool
+	allowOrigin string
+	maxAge      int
 }
 
 func (s *StandardCorsRealization) GetUseCors() bool {
-	return s.UseCors
+	return s.useCors
 }
 
 func (s *StandardCorsRealization) GetAllowOrigin() string {
-	return s.AllowOrigin
+	return s.allowOrigin
 }
 
 func (s *StandardCorsRealization) GetMaxAge() int {
-	return s.MaxAge
+	return s.maxAge
+}
+
+func (u *StandardCorsRealization) NewStandardCors(
+	c config.CorsConfigI,
+) error {
+	u.useCors = c.GetUseCors()
+	u.allowOrigin = c.GetAllowOrigin()
+	u.maxAge = c.GetMaxAge()
+	return nil
 }

@@ -62,6 +62,7 @@ var (
 // api mistakes:
 var (
 	ErrInvalidApiPathFormat = errors.New("invalid api path formst")
+	ErrIdInPath             = errors.New("path object id error")
 	ErrPointIDNull          = errors.New("point ID must not be 0")
 	ErrInvalidHeader        = errors.New("invalid Authorization header")
 	ErrNoAuthHeader         = errors.New("no Authorization header")

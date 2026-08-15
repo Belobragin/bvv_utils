@@ -9,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 
 	ardan "github.com/ardanlabs/conf"
-	"github.com/bvv_utils/goutils/config"
-	"github.com/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/config"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 )
 
 const ttrue = "true"

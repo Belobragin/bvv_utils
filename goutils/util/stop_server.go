@@ -40,7 +40,7 @@ func Halt(
 	sch <- struct{}{}
 }
 
-func Goodbye(
+func GoodbyeWithGrpc(
 	zapstruct *zap.Logger,
 	stopChannel chan<- struct{},
 	grpcServer *grpc.Server,
@@ -49,14 +49,29 @@ func Goodbye(
 	for _, s := range allserver {
 		ProdServer{s}.Stop(zapstruct)
 	}
-	grpcServer.GracefulStop()
-	close(stopChannel)
-	time.Sleep(FinalCloseTime)
-	grpcServer.Stop()
-	os.Exit(1)
+	zapstruct.Info("closed all http servers")
+	var c = make(chan struct{})
+	ctx, cancel := context.WithTimeout(context.Background(), FinalCloseTime)
+	defer cancel()
+	defer close(stopChannel)
+	if grpcServer != nil {
+		go func() {
+			grpcServer.GracefulStop()
+			zapstruct.Info("grpc server gracefully stopped")
+			c <- struct{}{}
+		}()
+		select {
+		case <-c:
+			return
+		case <-ctx.Done():
+			grpcServer.Stop()
+			zapstruct.Error("force stopped grpc server, will return now")
+			os.Exit(1)
+		}
+	}
 }
 
-func GoodbyeNoGrpc(
+func GoodbyeHttp(
 	zapstruct *zap.Logger,
 	stopChannel chan<- struct{},
 	allserver ...*http.Server,
@@ -64,7 +79,6 @@ func GoodbyeNoGrpc(
 	for _, s := range allserver {
 		ProdServer{s}.Stop(zapstruct)
 	}
+	zapstruct.Info("closed all http servers")
 	close(stopChannel)
-	time.Sleep(FinalCloseTime)
-	os.Exit(1)
 }

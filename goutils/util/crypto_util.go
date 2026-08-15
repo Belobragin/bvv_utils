@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 
-	"github.com/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"golang.org/x/crypto/bcrypt"
 )
 

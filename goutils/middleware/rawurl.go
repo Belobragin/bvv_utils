@@ -3,7 +3,7 @@ package middleware
 // import (
 // 	"net/http"
 
-// 	"github.com/bvv_utils/goutils/util"
+// 	"github.com/belobragin/bvv_utils/goutils/util"
 // 	"github.com/gorilla/mux"
 // 	"go.uber.org/zap"
 // )

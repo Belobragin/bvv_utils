@@ -7,8 +7,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/bvv_utils/goutils/mistake"
-	"github.com/bvv_utils/goutils/token"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/token"
 	"go.uber.org/zap"
 
 	"github.com/gorilla/mux"

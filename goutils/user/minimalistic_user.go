@@ -3,7 +3,7 @@ package user
 import (
 	"encoding/json"
 
-	"github.com/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 )
 
 const (

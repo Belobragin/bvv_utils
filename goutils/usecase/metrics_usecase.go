@@ -1,44 +1,130 @@
 package usecase
 
 import (
+	"fmt"
 	"net/http"
+	"slices"
+	"time"
 
+	"github.com/belobragin/bvv_utils/goutils/metrica"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.uber.org/zap"
 )
 
-type MetricsStandardUseCaseI interface {
-	GetMetricsPort() string
+type BaseMetricI interface {
+	GetCounterVec() []*prometheus.CounterVec
+	SetStatusCodeApiCallMetrica(metrica.ServiceApiCallMetricaLabelsI) error
 }
 
 // use single register for all custom metrics
-type MetricClientI interface {
-	// general:
-	GetLog() *zap.Logger
-	GetCustomRegistry() *prometheus.Registry
+type MetricI interface {
+	BaseMetricI
+	GetMetricPort() string
+	NewCustomMetricServer(time.Duration) *http.Server
+	// private:
+	getCustomRegistry() *prometheus.Registry
 }
 
-type MetricsStandardUseCaseRealization struct {
-	MetricsPort string
+type MetricRealization struct {
+	p string
+	c []*prometheus.CounterVec
+	r *prometheus.Registry
 }
 
-func (s *MetricsStandardUseCaseRealization) GetMetricsPort() string {
-	return s.MetricsPort
+func (l *MetricRealization) GetMetricPort() string {
+	return l.p
 }
 
-type MetricClientStruct struct {
-	MetricClientI
+func (l *MetricRealization) GetCounterVec() []*prometheus.CounterVec {
+	return l.c
 }
 
-func (m *MetricClientStruct) CustomMetricsHandler() http.Handler {
-	if mm := m.GetCustomRegistry(); mm == nil {
-		return nil
-	} else {
-		return promhttp.HandlerFor(mm, promhttp.HandlerOpts{Registry: mm})
+func (l *MetricRealization) getCustomRegistry() *prometheus.Registry {
+	return l.r
+}
+
+// run prometheus metrics server:
+func (s *MetricRealization) NewCustomMetricServer(timeout time.Duration) *http.Server {
+	return &http.Server{
+		Addr:              ":" + s.GetMetricPort(),
+		ReadHeaderTimeout: timeout,
+		Handler:           CustomMetricRouter(s),
 	}
 }
 
-func (m *MetricClientStruct) GetStandardMetrics() http.Handler {
-	return promhttp.Handler()
+func (s *MetricRealization) SetStatusCodeApiCallMetrica(l metrica.ServiceApiCallMetricaLabelsI) error {
+	u := s.GetCounterVec()
+	if len(u) == 0 {
+		return mistake.ErrApiMetricVectorNull
+	}
+	t, e := u[0].GetMetricWithLabelValues(l.GetStatusCodeLabel(), l.GetMethodLabel(), l.GetModellabel())
+	if e != nil {
+		return mistake.NewAddErr(mistake.ErrMetricaLabel, e)
+	}
+	t.Inc()
+	return nil
+}
+func (m *MetricRealization) NewMetricRealization(
+	p string,
+	counterVecs ...*prometheus.CounterVec) error {
+	if m == nil {
+		return mistake.ErrNulMetrica
+	}
+	if len(p) > 0 {
+		m.p = p
+	} else {
+		return mistake.ErrMetricPort
+	}
+	m.r = prometheus.NewRegistry()
+	for _, v := range counterVecs {
+		if !slices.Contains(metrica.AllMetrica, v) {
+			return mistake.ErrInvalidMetricRegister
+		}
+		m.c = append(m.c, v)
+		m.r.Register(v)
+	}
+	return nil
+}
+
+const (
+	MetricPrefix = "metrics"
+)
+
+var (
+	StandardMetricRoute = fmt.Sprintf("/%s/%s", MetricPrefix, "standard")
+	CustomMetricRoute   = fmt.Sprintf("/%s/%s", MetricPrefix, "custom")
+)
+
+// base metrics only:
+func AddDefaultMetricRoutes(mux *http.ServeMux, metricClient MetricI) {
+	mux.Handle(StandardMetricRoute, promhttp.Handler())
+}
+
+func DefaultMetricRouter(
+	useCase MetricI,
+) http.Handler {
+	mux := http.NewServeMux()
+	AddDefaultMetricRoutes(mux, useCase)
+
+	return mux
+}
+
+// base and custom metrics:
+func AddCustomMetricRoutes(mux *http.ServeMux, metricClient MetricI) {
+	mux.Handle(StandardMetricRoute, promhttp.Handler())
+	mux.Handle(
+		CustomMetricRoute,
+		promhttp.HandlerFor(
+			metricClient.getCustomRegistry(),
+			promhttp.HandlerOpts{Registry: metricClient.getCustomRegistry()}))
+}
+
+func CustomMetricRouter(
+	useCase MetricI,
+) http.Handler {
+	mux := http.NewServeMux()
+	AddCustomMetricRoutes(mux, useCase)
+
+	return mux
 }

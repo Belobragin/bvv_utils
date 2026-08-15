@@ -1,4 +1,4 @@
-module github.com/bvv_utils/goutils
+module github.com/belobragin/bvv_utils/goutils
 
 go 1.25.3
 

@@ -1,7 +1,26 @@
 package config
 
+type CorsConfigI interface {
+	GetUseCors() bool
+	GetAllowOrigin() string
+	GetMaxAge() int
+}
 type CorsConfig struct {
-	UseCors     bool   `conf:"default:false,env:USE_CORS"`
-	AllowOrigin string `conf:"env:ACCESS_CONTROL_ALLOW_ORIGIN"`
-	MaxAge      int    `conf:"default:3600,env:ACCESS_CONTROL_MAX_AGE"`
+	useCors     bool   `conf:"default:false,env:USE_CORS"`
+	allowOrigin string `conf:"env:ACCESS_CONTROL_ALLOW_ORIGIN"`
+	maxAge      int    `conf:"default:3600,env:ACCESS_CONTROL_MAX_AGE"`
+}
+
+func (s *CorsConfig) GetUseCors() bool {
+	return s.useCors
+}
+func (s *CorsConfig) GetAllowOrigin() string {
+	return s.allowOrigin
+}
+func (s *CorsConfig) GetMaxAge() int {
+	return s.maxAge
+}
+
+func (c *CorsConfig) ValidateCorsConfig() error {
+	return nil
 }

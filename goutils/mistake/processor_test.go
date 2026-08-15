@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bvv_utils/goutils/log"
+	"github.com/belobragin/bvv_utils/goutils/log"
 )
 
 const testErrMessage = "test error"

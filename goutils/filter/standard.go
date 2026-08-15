@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bvv_utils/goutils/mistake"
-	"github.com/bvv_utils/goutils/util"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/util"
 )
 
 var InputStandardFilterFields = []string{"sort_order", "sort_by", "page"}

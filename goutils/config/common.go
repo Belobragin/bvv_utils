@@ -4,9 +4,12 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/bvv_utils/goutils/mistake"
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 )
 
+type StandardConfigI interface {
+	GetApiPort() string
+}
 type StandardConfig struct {
 	App struct {
 		// PromoHost string `conf:"env:PROMO_HOST"`

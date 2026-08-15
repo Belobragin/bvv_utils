@@ -10,7 +10,7 @@ type contextKey string
 
 const contextKeyRequestID contextKey = "requestID"
 
-func AssignRequestID(ctx context.Context) context.Context {
+func assignRequestID(ctx context.Context) context.Context {
 	return context.WithValue(ctx, contextKeyRequestID, uuid.NewString())
 }
 

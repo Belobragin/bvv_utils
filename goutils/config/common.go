@@ -23,7 +23,7 @@ type StandardConfig struct {
 }
 
 func (s *StandardConfig) GetApiPort() string {
-	return s.App.ApiPort
+	return s.App.PromoPort
 }
 func (s *StandardConfig) GetLogLevel() string {
 	return s.LogLevel

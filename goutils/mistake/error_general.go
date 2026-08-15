@@ -8,6 +8,9 @@ var (
 	ErrStrangeOutput            = errors.New("this must not happen")
 	ErrNullLogger               = errors.New("logger is null")
 	ErrCommunicationChan        = errors.New("error channel is null")
+	ErrInvalidUserUUID          = errors.New("user id invalid")
+	ErrInvalidOtherTokenData    = errors.New("token data invalid")
+	ErrAutorenewSessionIDNull   = errors.New("session is is null")
 	ErrNullUserUUID             = errors.New("token user_uuid field is empty")
 	ErrInvalidAud               = errors.New("Token's audience is out of service scope")
 	ErrInvalidStatusCode        = errors.New("status code is not 200, 201")
@@ -34,6 +37,7 @@ var (
 // filter mistakes:
 var (
 	ErrFilterQuery            = errors.New("produce filter query err")
+	ErrInvalidSortOrder       = errors.New("sort order invalid: must be asc, desc")
 	ErrNillFilterData         = errors.New("standard filter data input must not be nil")
 	ErrInvalidTableFilter     = errors.New("table name input is invalid")
 	ErrInvalidParameterFilter = errors.New("filter parameters invalid")
@@ -61,6 +65,7 @@ var (
 	ErrPointIDNull          = errors.New("point ID must not be 0")
 	ErrInvalidHeader        = errors.New("invalid Authorization header")
 	ErrNoAuthHeader         = errors.New("no Authorization header")
+	ErrNulUser              = errors.New("user uuid must not be nil")
 )
 
 // input-output mistakes:
@@ -115,6 +120,8 @@ var (
 var (
 	ErrTxFailed         = errors.New("can not start transaction")
 	ErrCloseTransaction = errors.New("can not close transaction")
+	ErrDbPing           = errors.New("failed to ping database")
+	ErrDbIsNotPsql      = errors.New("database object is not postgres")
 )
 
 // background process errors:

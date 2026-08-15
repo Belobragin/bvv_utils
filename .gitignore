@@ -17,6 +17,6 @@ makefile
 **/*.ipynb
 
 ## distributives for local install
-# dist
-# **/*.egg-info
-# build
+dist
+**/*.egg-info
+build

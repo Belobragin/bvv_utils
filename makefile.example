@@ -1,0 +1,14 @@
+SHELL=/bin/bash
+
+## ----------------------------------------------------------------------
+## This is a help comment. The purpose of this Makefile is to process 
+## all-projects libraries collected in bvv_utils repository
+## Help comments are displayed in the order defined within the Makefile
+## All comands are initiated with make (command) if not stated otherwise
+## ----------------------------------------------------------------------
+
+help:	## Show this help.
+	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST)
+
+
+

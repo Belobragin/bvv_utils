@@ -1,6 +1,7 @@
-## BelobraginVV utilites for kaggle competitions
+## BelobraginVV utilites and packages
+useful one for overall development. Apache licenced.
 
-### Installation
+### python installation
 
 From source:
 
@@ -17,3 +18,4 @@ Locally:
 pip3 install bvv_utils
 ```
 
+### go installation

@@ -1,10 +1,22 @@
+## python cache files
 .ipynb*
-*.ipynb
-**/*.ipynb
+
 __py*
 **/__py*
 __pycache__
-tor_api_confi*
-tor_log*
+
+## temporary content
 temp/
 
+## makefile
+!makefile.example
+makefile
+
+# local development
+**/go.local.*
+**/*.ipynb
+
+## distributives for local install
+# dist
+# **/*.egg-info
+# build

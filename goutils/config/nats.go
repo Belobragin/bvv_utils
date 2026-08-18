@@ -53,7 +53,7 @@ type NatsConfig struct {
 	Nats struct {
 		URI  string `conf:"env:NATS_ADDRESS"`
 		Name string `conf:"env:NATS_CLIENT_NAME"`
-		User string `default:,conf: "env:NATS_AUTH_NAME"`
+		User string `default:,conf: "env:NATS_USER"`
 		Psw  string `default:,conf:"env:NATS_PSW"`
 	}
 }

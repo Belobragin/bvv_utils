@@ -11,11 +11,11 @@ type MetricConfigI interface {
 }
 type MetricConfig struct {
 	// port exposed for prometheus metrics
-	metricsPort string `conf:"env:METRICS_PORT"`
+	MetricsPort string `conf:"env:METRICS_PORT"`
 }
 
 func (s *MetricConfig) GetMetricPort() string {
-	return s.metricsPort
+	return s.MetricsPort
 }
 
 func (c *MetricConfig) ValidateMetricConfig() error {

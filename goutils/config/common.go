@@ -11,9 +11,11 @@ type StandardConfigI interface {
 	GetApiPort() string
 }
 type StandardConfig struct {
-	App struct {
+	Debug      bool   `conf:"default:False,env:Debug"`
+	SwagOutdir string `conf:"env:SWAG_OUTDIR"`
+	App        struct {
 		// PromoHost string `conf:"env:PROMO_HOST"`
-		PromoPort string `conf:"env:PROMO_PORT"`
+		PromoPort string `conf:"env:API_REST_PORT"`
 	}
 	Db struct {
 		Dsn string `conf:"mask,env:DB_DSN"`

@@ -25,7 +25,7 @@ type StandardUseCaseRealization struct {
 	log         *zap.Logger
 	db          *database.ProjectPsqlDb
 	errC        chan error
-	ServiceName string
+	serviceName string
 	apiPort     string
 	allStopChan chan struct{}
 }
@@ -43,7 +43,7 @@ func (s *StandardUseCaseRealization) ErrCh() chan error {
 }
 
 func (s *StandardUseCaseRealization) GetServiceName() string {
-	return s.ServiceName
+	return s.serviceName
 }
 
 func (s *StandardUseCaseRealization) GetApiPort() string {
@@ -54,16 +54,17 @@ func (s *StandardUseCaseRealization) GetAllStopChan() chan struct{} {
 	return s.allStopChan
 }
 
-func (u *StandardUseCaseRealization) NewStandardUseCase(
+func NewStandardUseCase(
 	c config.StandardConfigI,
 	l *zap.Logger,
 	ec chan error,
-) error {
+) (*StandardUseCaseRealization, error) {
+	var u = new(StandardUseCaseRealization)
 	u.log = l
 	u.errC = ec
 	u.apiPort = c.GetApiPort()
 	u.allStopChan = make(chan struct{}, 1)
-	return nil
+	return u, nil
 }
 
 type StandardCorsRealization struct {
@@ -84,11 +85,12 @@ func (s *StandardCorsRealization) GetMaxAge() int {
 	return s.maxAge
 }
 
-func (u *StandardCorsRealization) NewStandardCors(
+func NewStandardCors(
 	c config.CorsConfigI,
-) error {
+) (*StandardCorsRealization, error) {
+	var u = new(StandardCorsRealization)
 	u.useCors = c.GetUseCors()
 	u.allowOrigin = c.GetAllowOrigin()
 	u.maxAge = c.GetMaxAge()
-	return nil
+	return u, nil
 }

@@ -46,6 +46,9 @@ func (l *MetricRealization) getCustomRegistry() *prometheus.Registry {
 
 // run prometheus metrics server:
 func (s *MetricRealization) NewCustomMetricServer(timeout time.Duration) *http.Server {
+	if s == nil {
+		s = new(MetricRealization)
+	}
 	return &http.Server{
 		Addr:              ":" + s.GetMetricPort(),
 		ReadHeaderTimeout: timeout,
@@ -65,26 +68,25 @@ func (s *MetricRealization) SetStatusCodeApiCallMetrica(l metrica.ServiceApiCall
 	t.Inc()
 	return nil
 }
-func (m *MetricRealization) NewMetricRealization(
+func NewMetricRealization(
 	p string,
-	counterVecs ...*prometheus.CounterVec) error {
-	if m == nil {
-		return mistake.ErrNulMetrica
-	}
+	counterVecs ...*prometheus.CounterVec) (*MetricRealization, error) {
+	var m = new(MetricRealization)
+
 	if len(p) > 0 {
 		m.p = p
 	} else {
-		return mistake.ErrMetricPort
+		return nil, mistake.ErrMetricPort
 	}
 	m.r = prometheus.NewRegistry()
 	for _, v := range counterVecs {
 		if !slices.Contains(metrica.AllMetrica, v) {
-			return mistake.ErrInvalidMetricRegister
+			return nil, mistake.ErrInvalidMetricRegister
 		}
 		m.c = append(m.c, v)
 		m.r.Register(v)
 	}
-	return nil
+	return m, nil
 }
 
 const (

@@ -24,15 +24,18 @@ func (s *StandardJwtRealization) GetToken() token.TokenDataI {
 }
 
 // argument foo is a function which provides key as a byte sequence and a read key error
-func (s *StandardJwtRealization) NewStandardJwtRealization(
+func NewStandardJwtRealization(
 	c config.JwtConfigI,
 	t token.TokenDataI,
 	foo func(string) ([]byte, error),
-) error {
+) (*StandardJwtRealization, error) {
+	var (
+		s   = new(StandardJwtRealization)
+		err error
+	)
 	s.token = t
-	var err error
 	s.key, err = c.GetKey(foo)
-	return err
+	return s, err
 }
 
 type JwtTokenConfigI interface {
@@ -59,20 +62,23 @@ func (s *TokenJwtRealization) GetToken() token.TokenDataI {
 }
 
 // argument foo is a function which provides key as a byte sequence and a read key error
-func (s *TokenJwtRealization) NewStandardJwtRealization(
+func NewStandardTokenRealization(
 	c config.JwtTokenConfigI,
 	t token.TokenDataI,
 	foo func(string) ([]byte, error),
-) error {
+) (*TokenJwtRealization, error) {
+	var (
+		s   = new(TokenJwtRealization)
+		err error
+	)
 	s.token = t
-	var err error
 	s.pubKey, err = c.GetPubKey(foo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	s.secretKey, err = c.GetSecretKey(foo)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return s, nil
 }

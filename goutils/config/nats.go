@@ -11,8 +11,8 @@ type BrokerConfig struct {
 	Broker struct {
 		URI  string `conf:"env:NATS_ADDRESS"`
 		Name string `conf:"env:NATS_CLIENT_NAME"`
-		User string `default:,conf:"env:BROKER_AUTH_NAME"`
-		Psw  string `default:,conf:"env:BROKER_PSW"`
+		User string `conf:"env:BROKER_AUTH_NAME"`
+		Psw  string `conf:"env:BROKER_PSW"`
 	}
 }
 
@@ -53,7 +53,7 @@ type NatsConfig struct {
 	Nats struct {
 		URI  string `conf:"env:NATS_ADDRESS"`
 		Name string `conf:"env:NATS_CLIENT_NAME"`
-		User string `default:,conf: "env:NATS_USER"`
+		User string `default:,conf:"env:NATS_USER"`
 		Psw  string `default:,conf:"env:NATS_PSW"`
 	}
 }

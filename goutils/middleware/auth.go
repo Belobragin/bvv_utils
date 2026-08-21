@@ -2,21 +2,17 @@ package middleware
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net/http"
-	"slices"
 	"strings"
 
 	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"github.com/belobragin/bvv_utils/goutils/token"
+	"github.com/belobragin/bvv_utils/goutils/util"
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 
 	"github.com/gorilla/mux"
-)
-
-const (
-	authCookieName    = "bvv_auth_cookie"
-	sessionCookieName = "bvv_session_cookie"
 )
 
 type AuthError struct {
@@ -24,28 +20,34 @@ type AuthError struct {
 	Message string
 }
 
-/*
-this middleware does NOT distinguish among user, f_user & partner
-and codes as user_uuid token data from any field: user_uuid, f_user_uuid & partner_uuid
-*/
+type auth interface {
+	OutPubKey() (any, error)
+	GetLog() *zap.Logger
+	GetToken() token.TokenDataI
+}
 
 func AuthenticateRsaBearerMiddleware(
-	zapstruct *zap.Logger,
+	u auth,
 	optionalRoutes []string,
-	serviceName string,
-	parseKeyFunc func(interface{}, interface{}) error,
-	pubKey interface{},
-	fail func(w http.ResponseWriter, r *http.Request, e error),
+	authCookieName, sessionCookieName,
+	claimSessionCookieKey string,
 ) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var (
-				ctx                         = r.Context()
-				claims                      = new(token.TokenData)
-				ac, sc, intendedServiceName string
+				e                         error
+				err                       mistake.OuterrorI
+				ac, sc, header            string
+				headerParts               []string
+				authCookie, sessionCookie *http.Cookie
+				ctx                       = r.Context()
+				route                     = mux.CurrentRoute(r)
+				optional                  = false
+				zapstruct                 = u.GetLog()
+				claims                    = u.GetToken()
+				cookie                    = new(string)
+				pubKey                    any
 			)
-			route := mux.CurrentRoute(r)
-			optional := false
 			for _, name := range optionalRoutes {
 				if name == route.GetName() {
 					zapstruct.Info("Public route, ", zap.String("name: ", name))
@@ -54,146 +56,97 @@ func AuthenticateRsaBearerMiddleware(
 				}
 			}
 			// read cookie:
-			authCookie, err := r.Cookie(authCookieName)
-			switch err {
+			authCookie, e = r.Cookie(authCookieName)
+			switch e {
 			case nil:
 				ac = authCookie.Value
 				if ac == "" {
-					zapstruct.Error(
-						"Invalid auth cookie - null value: ", zap.Error(errors.New("")),
-					)
-					fail(w, r, AuthError{
-						error:   err,
-						Message: "Invalid auth cookie: null value",
-					})
-					return
+					err = mistake.NewOutErr(
+						mistake.ErrEmptyAuthCookie, http.StatusUnauthorized)
+					goto mistakehttp
+
 				}
-				// ctx = context.WithValue(ctx, pdata.JwtClaimAuthCookieKey, ac)
 			case http.ErrNoCookie:
+				// intentionally no operand there!
 			default:
-				zapstruct.Error(
-					"Invalid auth cookie - null value: ", zap.Error(err),
-				)
-				fail(w, r, AuthError{
-					error:   err,
-					Message: "Invalid auth cookie: no value",
-				})
-				return
+				err = mistake.NewOutErr(e, http.StatusUnauthorized)
+				goto mistakehttp
 			}
-			sessionCookie, err := r.Cookie(sessionCookieName)
-			switch err {
+			sessionCookie, e = r.Cookie(sessionCookieName)
+			switch e {
 			case nil:
 				sc = sessionCookie.Value
 				if sc == "" {
-					zapstruct.Error(
-						"Invalid session cookie - null value: ", zap.Error(errors.New("")),
-					)
-					fail(w, r, AuthError{
-						error:   err,
-						Message: "Invalid session cookie: null value",
-					})
-					return
+					err = mistake.NewOutErr(
+						mistake.ErrEmptySessionCookie, http.StatusUnauthorized)
+					goto mistakehttp
 				}
-				ctx = context.WithValue(ctx, "auth_cookie", sc)
+				ctx = context.WithValue(ctx, claimSessionCookieKey, sc)
 			case http.ErrNoCookie:
 			default:
-				zapstruct.Error(
-					"Invalid auth cookie - null value: ", zap.Error(err),
-				)
-				fail(w, r, AuthError{
-					error:   err,
-					Message: "Invalid session cookie: no value",
-				})
-				return
+				err = mistake.NewOutErr(e, http.StatusUnauthorized)
+				goto mistakehttp
 			}
 			// read headers:
-			header := r.Header.Get("Authorization")
+			header = r.Header.Get("Authorization")
 			if header == "" || header == "Bearer" {
 				if optional {
-					next.ServeHTTP(w, r.WithContext(ctx))
-					return
+					goto nexthttp
 				} else {
-					err = errors.New("no Authorization header")
-					zapstruct.Error(
-						"JWT Token not valid: ", zap.Error(err),
-					)
-					fail(w, r, AuthError{
-						error:   err,
-						Message: "JWT Token not valid",
-					})
-					return
+					err = mistake.NewOutErr(mistake.ErrNoAuthHeader, http.StatusUnauthorized)
+					goto mistakehttp
 				}
 			}
-			headerParts := strings.Split(header, " ")
+			headerParts = strings.Split(header, " ")
 			if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-				err = errors.New("invalid Authorization header")
-				zapstruct.Error(
-					"JWT Token not valid: ", zap.Error(err),
-				)
-				fail(w, r, AuthError{
-					error:   err,
-					Message: "JWT Token not valid",
-				})
-				return
+				err = mistake.NewOutErr(
+					mistake.ErrInvalidJAuthHeader, http.StatusUnauthorized)
+				goto mistakehttp
 			}
-			var inp interface{} = headerParts[1]
-			err = parseKeyFunc(inp, pubKey)
-			// err = claims.ParseValidateRsaToken(headerParts[1], pubKey)
+			pubKey, e = u.OutPubKey()
+			if e != nil {
+				err = mistake.NewOutErr(e, http.StatusUnauthorized)
+				goto mistakehttp
+			}
+			e = claims.ParseValidateRsaToken(headerParts[1], pubKey)
 			//OTLADKA:
 			// fmt.Printf("%+v\n", claims)
-			switch err {
+			switch e {
 			case nil:
-			// case jwt.ErrTokenExpired:
-			// 	c := claims.ContextID
-			// 	if !util.CompareCookieWithHash(ac, c) {
-			// 		err = errors.New("Invalid JWT Token context_id")
-			// 		zapstruct.Error(
-			// 			"JWT Token not valid: ", zap.Error(err),
-			// 		)
-			// 		fail(w, r, AuthError{
-			// 			error:   err,
-			// 			Message: "JWT Token not valid",
-			// 		})
-			// 		return
-			// 	}
-			// 	// put old token data to context:
-			// 	ctx = context.WithValue(ctx, "old_token", claims)
-			// 	// do NOT check and record token auth fields:
-			// 	goto nexthttp
+				c, ok := claims.(token.AutoRenewTokenDataI)
+				if !ok {
+					err = mistake.NewOutErr(
+						fmt.Errorf("no renew data"), http.StatusUnauthorized)
+					goto mistakehttp
+				}
+				if cookie = c.GetSessionID(); cookie == nil {
+					err = mistake.NewOutErr(
+						mistake.ErrAutorenewSessionIDNull, http.StatusUnauthorized)
+					goto mistakehttp
+				}
+				if !util.CompareCookieWithHash(ac, *cookie) {
+					err = mistake.NewOutErr(
+						mistake.ErrCookieSignatureInvalid, http.StatusUnauthorized)
+					goto mistakehttp
+				}
+				// put token data to context:
+				ctx = context.WithValue(ctx, token.JwtOldClaimKey, claims)
+				// do NOT check and record token auth fields:
+				goto nexthttp
+			case jwt.ErrTokenExpired:
+				err = mistake.NewOutErr(e, http.StatusRequestTimeout)
+				goto mistakehttp
 			default:
-				zapstruct.Error(
-					"JWT Token not valid: ", zap.Error(err),
-				)
-				fail(w, r, AuthError{
-					error:   err,
-					Message: "JWT Token not valid",
-				})
-				return
-			}
-			intendedServiceName = strings.Split(mux.CurrentRoute(r).GetName(), "_")[0]
-			// if !slices.Contains(claims.RegisteredClaims.Audience, intendedServiceName) &&
-			// 	intendedServiceName != pdata.RenewObligatoryName {
-			if !slices.Contains(claims.RegisteredClaims.Audience, intendedServiceName) {
-				err = mistake.ErrServiceUnIntended
-				fail(w, r, AuthError{
-					error:   err,
-					Message: "Invalid JWT Token",
-				})
-				return
+				err = mistake.NewOutErr(e, http.StatusUnauthorized)
+				goto mistakehttp
 			}
 			// fmt.Printf("%+v\n", claims)
-			// if claims.UserUUID != "" {
-			// 	ctx = context.WithValue(ctx, "userUUID", claims.UserUUID)
-			// } else {
-			// 	err = mistake.ErrInvalidToken
-			// 	fail(w, r, AuthError{
-			// 		error:   err,
-			// 		Message: "Invalid JWT Token",
-			// 	})
-			// 	return
-			// }
-			ctx = context.WithValue(ctx, "roleID", claims.Role)
+		nexthttp:
 			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		mistakehttp:
+			zapstruct.Error(err.Err().Error())
+			StandardRespond(zapstruct, w, r, err.ErrCode(), err.Err().Error())
 		})
 	}
 }

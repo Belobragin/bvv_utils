@@ -1,9 +1,9 @@
 ## python cache files
-.ipynb*
-
-__py*
+**/.ipynb*
+**/*.ipynb
 **/__py*
-__pycache__
+**/__py*
+**/__pycache__
 
 ## temporary content
 temp/
@@ -14,9 +14,8 @@ makefile
 
 # local development
 **/go.local.*
-**/*.ipynb
 
 ## distributives for local install
-dist
+**/dist
 **/*.egg-info
-build
+**/build

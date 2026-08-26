@@ -18,7 +18,7 @@ type EventListenerI interface {
 }
 
 type EventMessageI interface {
-	GetKey() *uint8
+	GetEventMessageKey() *uint8
 	GetValue() map[string]interface{}
 	// GetValue() interface{}
 }

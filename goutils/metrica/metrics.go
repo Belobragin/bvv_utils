@@ -76,8 +76,8 @@ func (s *EventMetricaLabels) GetResultLabel() string {
 func newEventMetrica() *prometheus.CounterVec {
 	return prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "kafka_event_call_total",
-			Help: "Number of nats requests succes/fail",
+			Name: "broker_event_call_total",
+			Help: "Number of broker requests succes/fail",
 		},
 		[]string{"result", "event_type", "model"},
 	)

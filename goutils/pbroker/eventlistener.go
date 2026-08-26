@@ -17,7 +17,7 @@ type InputEvent struct {
 	// Value interface{} `json:"value"`
 }
 
-func (i *InputEvent) GetKey() *uint8 {
+func (i *InputEvent) GetEventMessageKey() *uint8 {
 	return i.Key
 }
 

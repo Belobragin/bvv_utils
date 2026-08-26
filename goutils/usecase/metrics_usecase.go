@@ -70,7 +70,7 @@ func (s *MetricRealization) SetStatusCodeApiCallMetrica(l metrica.ServiceApiCall
 }
 func NewMetricRealization(
 	p string,
-	counterVecs ...*prometheus.CounterVec) (*MetricRealization, error) {
+	counterVecs ...*prometheus.CounterVec) (MetricI, error) {
 	var m = new(MetricRealization)
 
 	if len(p) > 0 {

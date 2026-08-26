@@ -11,7 +11,6 @@ type StandardUseCaseI interface {
 	GetDb() *database.ProjectPsqlDb
 	GetLog() *zap.Logger
 	GetApiPort() string
-	GetMetricPort() string
 	GetServiceName() string
 	GetUseCors() bool
 	GetAllowOrigin() string

@@ -9,6 +9,7 @@ import (
 
 type StandardConfigI interface {
 	GetApiPort() string
+	GetMetricPort() string
 }
 type StandardConfig struct {
 	Debug      bool   `conf:"default:False,env:Debug"`

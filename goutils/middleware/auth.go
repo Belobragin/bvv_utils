@@ -93,7 +93,11 @@ func AuthenticateRsaBearerMiddleware(
 				if optional {
 					goto nexthttp
 				} else {
-					err = mistake.NewOutErr(mistake.ErrNoAuthHeader, http.StatusUnauthorized)
+					if header == "Bearer" {
+						err = mistake.NewOutErr(mistake.ErrNoAuthHeader, http.StatusUnauthorized)
+					} else {
+						err = mistake.NewOutErr(mistake.ErrInvalidHeader, http.StatusUnauthorized)
+					}
 					goto mistakehttp
 				}
 			}

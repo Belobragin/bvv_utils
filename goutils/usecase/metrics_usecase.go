@@ -4,24 +4,29 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
-	"time"
 
-	"github.com/belobragin/bvv_utils/goutils/metrica"
 	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type BaseMetricI interface {
-	GetCounterVec() []*prometheus.CounterVec
-	SetStatusCodeApiCallMetrica(metrica.ServiceApiCallMetricaLabelsI) error
-}
+// metrics list
+const (
+	ApiCallMetric = "status_code_api_call_metric"
+)
+
+var (
+	NewApiCallMetrica = newApiCallMetrica()
+	NewEventMetrica   = newEventMetrica()
+
+	// this variable for check, if metrica ever exist
+	AllMetrica = []*prometheus.CounterVec{NewApiCallMetrica, NewEventMetrica}
+)
 
 // use single register for all custom metrics
 type MetricI interface {
-	BaseMetricI
-	GetMetricPort() string
-	NewCustomMetricServer(time.Duration) *http.Server
+	GetCounterVec() []*prometheus.CounterVec
+	SetStatusCodeApiCallMetrica(ServiceApiCallMetricaLabelsI) error
 	// private:
 	getCustomRegistry() *prometheus.Registry
 }
@@ -32,10 +37,6 @@ type MetricRealization struct {
 	r *prometheus.Registry
 }
 
-func (l *MetricRealization) GetMetricPort() string {
-	return l.p
-}
-
 func (l *MetricRealization) GetCounterVec() []*prometheus.CounterVec {
 	return l.c
 }
@@ -44,19 +45,7 @@ func (l *MetricRealization) getCustomRegistry() *prometheus.Registry {
 	return l.r
 }
 
-// run prometheus metrics server:
-func (s *MetricRealization) NewCustomMetricServer(timeout time.Duration) *http.Server {
-	if s == nil {
-		s = new(MetricRealization)
-	}
-	return &http.Server{
-		Addr:              ":" + s.GetMetricPort(),
-		ReadHeaderTimeout: timeout,
-		Handler:           CustomMetricRouter(s),
-	}
-}
-
-func (s *MetricRealization) SetStatusCodeApiCallMetrica(l metrica.ServiceApiCallMetricaLabelsI) error {
+func (s *MetricRealization) SetStatusCodeApiCallMetrica(l ServiceApiCallMetricaLabelsI) error {
 	u := s.GetCounterVec()
 	if len(u) == 0 {
 		return mistake.ErrApiMetricVectorNull
@@ -70,7 +59,7 @@ func (s *MetricRealization) SetStatusCodeApiCallMetrica(l metrica.ServiceApiCall
 }
 func NewMetricRealization(
 	p string,
-	counterVecs ...*prometheus.CounterVec) (MetricI, error) {
+	counterVec *prometheus.CounterVec) (MetricI, error) {
 	var m = new(MetricRealization)
 
 	if len(p) > 0 {
@@ -79,13 +68,11 @@ func NewMetricRealization(
 		return nil, mistake.ErrMetricPort
 	}
 	m.r = prometheus.NewRegistry()
-	for _, v := range counterVecs {
-		if !slices.Contains(metrica.AllMetrica, v) {
-			return nil, mistake.ErrInvalidMetricRegister
-		}
-		m.c = append(m.c, v)
-		m.r.Register(v)
+	if !slices.Contains(AllMetrica, counterVec) {
+		return nil, mistake.ErrInvalidMetricRegister
 	}
+	m.c = append(m.c, counterVec)
+	m.r.Register(counterVec)
 	return m, nil
 }
 
@@ -103,15 +90,6 @@ func AddDefaultMetricRoutes(mux *http.ServeMux, metricClient MetricI) {
 	mux.Handle(StandardMetricRoute, promhttp.Handler())
 }
 
-func DefaultMetricRouter(
-	useCase MetricI,
-) http.Handler {
-	mux := http.NewServeMux()
-	AddDefaultMetricRoutes(mux, useCase)
-
-	return mux
-}
-
 // base and custom metrics:
 func AddCustomMetricRoutes(mux *http.ServeMux, metricClient MetricI) {
 	mux.Handle(StandardMetricRoute, promhttp.Handler())
@@ -122,11 +100,66 @@ func AddCustomMetricRoutes(mux *http.ServeMux, metricClient MetricI) {
 			promhttp.HandlerOpts{Registry: metricClient.getCustomRegistry()}))
 }
 
-func CustomMetricRouter(
-	useCase MetricI,
-) http.Handler {
-	mux := http.NewServeMux()
-	AddCustomMetricRoutes(mux, useCase)
+type ServiceApiCallMetricaLabelsI interface {
+	GetModellabel() string
+	GetMethodLabel() string
+	GetStatusCodeLabel() string
+}
 
-	return mux
+type ServiceApiCallMetricaLabels struct {
+	Model  string
+	Method string
+	Code   int
+}
+
+func (s *ServiceApiCallMetricaLabels) GetModellabel() string {
+	return s.Model
+}
+func (s *ServiceApiCallMetricaLabels) GetMethodLabel() string {
+	return s.Method
+}
+func (s *ServiceApiCallMetricaLabels) GetStatusCodeLabel() string {
+	return fmt.Sprintf("%d", s.Code)
+}
+
+// for Kafka, grpc etc. add other coubterVecs:
+func newApiCallMetrica() *prometheus.CounterVec {
+	return prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "api_call_status_code_response_total",
+			Help: "Number of http status code responses for the method for the model in the service",
+		},
+		[]string{"code", "method", "model"},
+	)
+}
+
+type EventMetricaLabelsI interface {
+	GetModellabel() string
+	GetEventTypeLabel() string
+	GetResultLabel() string
+}
+type EventMetricaLabels struct {
+	Model     string
+	EventType string
+	Result    string
+}
+
+func (s *EventMetricaLabels) GetModellabel() string {
+	return s.Model
+}
+func (s *EventMetricaLabels) GetEventTypeLabel() string {
+	return s.EventType
+}
+func (s *EventMetricaLabels) GetResultLabel() string {
+	return s.Result
+}
+
+func newEventMetrica() *prometheus.CounterVec {
+	return prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "broker_event_call_total",
+			Help: "Number of broker requests succes/fail",
+		},
+		[]string{"result", "event_type", "model"},
+	)
 }

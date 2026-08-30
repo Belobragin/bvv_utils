@@ -9,7 +9,7 @@ and this project makes best to adhere to [Semantic Versioning](https://semver.or
 #### Code
 - StandardUsecase metrics bugfix
 - generic GeneralModel and HTTPError introduced 
-- several tweaks with no backward compatibility; I am lucky nobodu uses this package
+- several tweaks with no backward compatibility; I am lucky nobody else uses this package
   
 ### [0.1.1] - 2026-21-08
 #### Code

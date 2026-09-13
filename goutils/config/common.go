@@ -10,9 +10,10 @@ import (
 type StandardConfigI interface {
 	GetApiPort() string
 	GetMetricPort() string
+	GetDebug() bool
 }
 type StandardConfig struct {
-	Debug      bool   `conf:"default:False,env:Debug"`
+	Debug      bool   `conf:"default:false,env:Debug"`
 	SwagOutdir string `conf:"env:SWAG_OUTDIR"`
 	App        struct {
 		// PromoHost string `conf:"env:PROMO_HOST"`
@@ -33,6 +34,9 @@ func (s *StandardConfig) GetApiPort() string {
 }
 func (s *StandardConfig) GetLogLevel() string {
 	return s.LogLevel
+}
+func (s *StandardConfig) GetDebug() bool {
+	return s.Debug
 }
 
 func (c *StandardConfig) ValidateStandardConfig() error {

@@ -1,6 +1,8 @@
 package mistake
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 )
 
@@ -26,4 +28,16 @@ func ErrorsProcessor(
 			zapstruct.Error("processor error:", zap.Error(msg))
 		}
 	}
+}
+
+// selects error code upon input error parameter `err`, in case of no match return input parameter `generalErrCode`
+func ErrorsSelector(err error, generalErrCode int, errMap map[error]int) int {
+	var wg sync.Mutex
+	wg.Lock()
+	defer wg.Unlock()
+	outputErrCode, ok := errMap[err]
+	if !ok {
+		return generalErrCode
+	}
+	return outputErrCode
 }

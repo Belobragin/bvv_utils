@@ -29,7 +29,7 @@ func (cw customWriter) Sync() error {
 
 /*
 Attn!
- 1. if use stdOut, can leave outpathO blank: `""` (and leave `buf“ nil)
+ 1. if use stdOut, can leave outpathO blank: `""` (and leave `buf` nil)
  2. for any case of io.Writer output just set outpathO to TestCustomIO accordingly.
     Of cource, you can change suffix above for the scheme as you like.
 */

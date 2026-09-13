@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"github.com/nats-io/nats.go"
 
 	"go.uber.org/zap"
@@ -29,15 +30,23 @@ func (i *InputEvent) GetValue() map[string]interface{} {
 	return i.Value
 }
 
-type EventListener struct {
+type NatsEventListener struct {
 	listenNatChan  chan *nats.Msg
 	eventProcessor HandleEventI
 	logger         *zap.Logger
 	stopChan       chan struct{}
 }
 
-func NewEventListener(natsChan chan *nats.Msg, ep HandleEventI, logger *zap.Logger, stopChan chan struct{}) *EventListener {
-	return &EventListener{
+func (w *NatsEventListener) getEventProcessor() (HandleEventI, error) {
+	if eventProcessor := w.eventProcessor; eventProcessor == nil {
+		return nil, mistake.ErrMessageTypeUnknown
+	} else {
+		return eventProcessor, nil
+	}
+}
+
+func NewNatsEventListener(natsChan chan *nats.Msg, ep HandleEventI, logger *zap.Logger, stopChan chan struct{}) *NatsEventListener {
+	return &NatsEventListener{
 		listenNatChan:  natsChan,
 		eventProcessor: ep,
 		logger:         logger,
@@ -45,9 +54,17 @@ func NewEventListener(natsChan chan *nats.Msg, ep HandleEventI, logger *zap.Logg
 	}
 }
 
-func (w *EventListener) ListenEvent() error {
+func (w *NatsEventListener) ListenEvent() error {
 	zapstruct := w.logger
-	var wg sync.WaitGroup
+	var (
+		eventProcessor HandleEventI
+		wg             sync.WaitGroup
+		err            error
+	)
+	if eventProcessor, err = w.getEventProcessor(); err != nil {
+		zapstruct.Error(err.Error())
+		return err
+	}
 	for {
 		select {
 		case <-w.stopChan:
@@ -55,11 +72,11 @@ func (w *EventListener) ListenEvent() error {
 			wg.Wait()
 			return nil
 		case msg := <-w.listenNatChan:
-			var m InputEvent
 			// m.Value = make(map[string]interface{})
 			if msg == nil {
 				continue
 			}
+			var m InputEvent
 			err := json.Unmarshal(msg.Data, &m)
 			if err != nil {
 				zapstruct.Error(fmt.Sprintf(`can not parse data from nats message with subject %s, reply %s,
@@ -75,9 +92,13 @@ func (w *EventListener) ListenEvent() error {
 			zapstruct.Info(fmt.Sprintf("Received event message %+v from %s with key: %d",
 				m, msg.Subject, *eventKey))
 
-			processF, err := w.eventProcessor.ProcessEvent(&m)
+			if eventProcessor == nil {
+
+				continue
+			}
+			processF, err := eventProcessor.ProcessEvent(&m)
 			if err != nil {
-				zapstruct.Error(fmt.Sprintf("get process foo for nats message key %d",
+				zapstruct.Error(fmt.Sprintf("get process foo error for nats message key %d",
 					m.Key), zap.Error(err))
 				continue
 			}

@@ -13,7 +13,8 @@ type ProjectEventProcessor struct {
 	sync.Mutex
 }
 
-func NewProjectEventProcessor(eventRoutesNamber int) (*ProjectEventProcessor, error) {
+func NewProjectEventProcessor(
+	eventRoutesNamber int) (*ProjectEventProcessor, error) {
 	var p = new(ProjectEventProcessor)
 	c := make(map[util.CatalogEventType]MessageProcessFoo, eventRoutesNamber)
 	p.processor = c

@@ -12,24 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type InputEvent struct {
-	Key   *uint8                 `json:"key"`
-	Value map[string]interface{} `json:"value"`
-	// Value interface{} `json:"value"`
-}
-
-func (i *InputEvent) GetEventMessageKey() *uint8 {
-	return i.Key
-}
-
-// func (i *InputEvent) GetValue() interface{} {
-// 	return i.Value
-// }
-
-func (i *InputEvent) GetValue() map[string]interface{} {
-	return i.Value
-}
-
 type NatsEventListener struct {
 	listenNatChan  chan *nats.Msg
 	eventProcessor HandleEventI
@@ -91,11 +73,6 @@ func (w *NatsEventListener) ListenEvent() error {
 			}
 			zapstruct.Info(fmt.Sprintf("Received event message %+v from %s with key: %d",
 				m, msg.Subject, *eventKey))
-
-			if eventProcessor == nil {
-
-				continue
-			}
 			processF, err := eventProcessor.ProcessEvent(&m)
 			if err != nil {
 				zapstruct.Error(fmt.Sprintf("get process foo error for nats message key %d",
@@ -103,14 +80,14 @@ func (w *NatsEventListener) ListenEvent() error {
 				continue
 			}
 			wg.Add(1)
-			go func(inp InputEvent, f MessageProcessFoo) {
+			go func(inp *InputEvent, f MessageProcessFoo) {
 				defer wg.Done()
-				e := f(context.TODO(), &inp)
+				e := f(context.TODO(), inp)
 				if e.Err() != nil {
 					zapstruct.Error(fmt.Sprintf("processed nats key %d",
 						m.Key), zap.Error(e.Err()))
 				}
-			}(m, processF)
+			}(&m, processF)
 		}
 	}
 }

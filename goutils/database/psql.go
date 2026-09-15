@@ -2,9 +2,13 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	_ "github.com/lib/pq"
 
@@ -71,6 +75,66 @@ func newDb(dsn, sslEnvRequired, sslEnvModeType, sslModeDisable string) (*sql.DB,
 	}
 
 	return c, nil
+}
+
+type ProjectPsqlGormDb struct {
+	*gorm.DB
+}
+
+func (p *ProjectPsqlGormDb) GetVersion() string {
+	return "gorm has no version method"
+}
+
+func (p *ProjectPsqlGormDb) CloseDb() error {
+	sqlDB, err := p.DB.DB()
+	if err != nil {
+		return errors.New("close DB gorm error")
+	}
+	return sqlDB.Close()
+}
+
+func (p *ProjectPsqlGormDb) ConfigureDb() error {
+	var (
+		d  config.PsqlDbConfig
+		pp *sql.DB
+	)
+	err := ardan.Parse(os.Args, "", &d)
+	if err != nil {
+		return err
+	}
+	p.DB, err = newGormDb(
+		d.Dsn,
+		d.SslEnvRequired,
+		d.SslEnvModeType,
+		d.SslModeDisable)
+	if err != nil {
+		return err
+	}
+	// Gorm uses database/sql to maintain connection pool
+	pp, err = newDb(
+		d.Dsn,
+		d.SslEnvRequired,
+		d.SslEnvModeType,
+		d.SslModeDisable)
+	if err != nil {
+		return err
+	}
+	if a := d.MaxConn; a > 0 {
+		pp.SetMaxOpenConns(a)
+	}
+	return nil
+}
+
+func newGormDb(dsn, sslEnvRequired, sslEnvModeType, sslModeDisable string) (*gorm.DB, error) {
+	dsn, err := prepareDSN(dsn, sslEnvRequired, sslEnvModeType, sslModeDisable)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %v", mistake.ErrDbPing, err)
+	}
+	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("%v: %v", mistake.ErrDbConnect, err)
+	}
+	return gormDB, nil
 }
 
 func prepareDSN(dsn string,

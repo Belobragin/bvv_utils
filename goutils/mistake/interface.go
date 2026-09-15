@@ -2,29 +2,29 @@ package mistake
 
 import "fmt"
 
-type OuterrorI interface {
+type OutErrI interface {
 	Err() error
 	ErrCode() int
 }
 
-type Outerror struct {
+type OutErr struct {
 	err  error
 	code int
 }
 
-func (o Outerror) Err() error {
+func (o OutErr) Err() error {
 	return o.err
 }
 
-func (o Outerror) ErrCode() int {
-	if o != (Outerror{}) {
+func (o OutErr) ErrCode() int {
+	if o != (OutErr{}) {
 		return o.code
 	}
 	return CodeOutErrNull
 }
 
-func NewOutErr(e error, c int) Outerror {
-	return Outerror{
+func NewOutErr(e error, c int) OutErr {
+	return OutErr{
 		err:  e,
 		code: c,
 	}

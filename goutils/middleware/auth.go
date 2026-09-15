@@ -36,7 +36,7 @@ func AuthenticateRsaBearerMiddleware(
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var (
 				e                         error
-				err                       mistake.OuterrorI
+				err                       mistake.OutErrI
 				ac, sc, header            string
 				headerParts               []string
 				authCookie, sessionCookie *http.Cookie

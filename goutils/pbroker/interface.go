@@ -9,18 +9,13 @@ import (
 type BrokerI interface {
 	Subscribe(uri, name, user, psw string) error
 	Unsubscribe() error
+	NewEventListener() EventListenerI
 }
 
-type MessageProcessFoo func(context.Context, EventMessageI) mistake.Outerror
+type MessageProcessFoo func(context.Context, EventMessageI) mistake.OutErr
 
 type EventListenerI interface {
 	ListenEvent() error
-}
-
-type EventMessageI interface {
-	GetEventMessageKey() *uint8
-	GetValue() map[string]interface{}
-	// GetValue() interface{}
 }
 
 type HandleEventI interface {

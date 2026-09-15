@@ -57,9 +57,10 @@ func (s *MetricRealization) SetStatusCodeApiCallMetrica(l ServiceApiCallMetricaL
 	t.Inc()
 	return nil
 }
+
 func NewMetricRealization(
 	p string,
-	counterVec *prometheus.CounterVec) (MetricI, error) {
+	counterVec ...*prometheus.CounterVec) (MetricI, error) {
 	var m = new(MetricRealization)
 
 	if len(p) > 0 {
@@ -68,11 +69,14 @@ func NewMetricRealization(
 		return nil, mistake.ErrMetricPort
 	}
 	m.r = prometheus.NewRegistry()
-	if !slices.Contains(AllMetrica, counterVec) {
-		return nil, mistake.ErrInvalidMetricRegister
+	for _, vec := range counterVec {
+		if !slices.Contains(AllMetrica, vec) {
+			return nil, mistake.ErrInvalidMetricRegister
+		}
+
+		m.c = append(m.c, vec)
+		m.r.Register(vec)
 	}
-	m.c = append(m.c, counterVec)
-	m.r.Register(counterVec)
 	return m, nil
 }
 
@@ -134,24 +138,24 @@ func newApiCallMetrica() *prometheus.CounterVec {
 }
 
 type EventMetricaLabelsI interface {
-	GetModellabel() string
+	GetModelLabel() string
 	GetEventTypeLabel() string
-	GetResultLabel() string
+	GetCodeLabel() string
 }
 type EventMetricaLabels struct {
-	Model     string
+	Code      string
 	EventType string
-	Result    string
+	Model     string
 }
 
-func (s *EventMetricaLabels) GetModellabel() string {
-	return s.Model
+func (s *EventMetricaLabels) GetCodeLabel() string {
+	return s.Code
 }
 func (s *EventMetricaLabels) GetEventTypeLabel() string {
 	return s.EventType
 }
-func (s *EventMetricaLabels) GetResultLabel() string {
-	return s.Result
+func (s *EventMetricaLabels) GetModelLabel() string {
+	return s.Model
 }
 
 func newEventMetrica() *prometheus.CounterVec {
@@ -160,6 +164,6 @@ func newEventMetrica() *prometheus.CounterVec {
 			Name: "broker_event_call_total",
 			Help: "Number of broker requests succes/fail",
 		},
-		[]string{"result", "event_type", "model"},
+		[]string{"code", "event_type", "model"},
 	)
 }

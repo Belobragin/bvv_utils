@@ -4,6 +4,11 @@ import (
 	"errors"
 )
 
+// timing mistakes
+var (
+	ErrNoTimestamps      = errors.New("no timestamps provided")
+	ErrDistinctTimestamp = errors.New("timestamps are different")
+)
 var (
 	ErrStrangeOutput            = errors.New("this must not happen")
 	ErrNullLogger               = errors.New("logger is null")
@@ -23,6 +28,11 @@ var (
 	ErrNotUniqueSerial          = errors.New("not unique serial key in the psql table")
 	ErrAllUpdateNull            = errors.New("one of update parameters must be not null")
 	ErrDbTxConflict             = errors.New("either db or tx must be non-nil, the other one must be nil")
+)
+
+// attributes of usecase:
+var (
+	ErrHttpClientNil = errors.New("http client is nil")
 )
 
 // control panel errors:

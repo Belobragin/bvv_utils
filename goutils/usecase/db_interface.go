@@ -1,4 +1,4 @@
-package database
+package usecase
 
 type ProjectDbI interface {
 	GetVersion() string

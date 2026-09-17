@@ -9,7 +9,6 @@ import (
 type BrokerI interface {
 	Subscribe(uri, name, user, psw string) error
 	Unsubscribe() error
-	NewEventListener() EventListenerI
 }
 
 type MessageProcessFoo func(context.Context, EventMessageI) mistake.OutErr

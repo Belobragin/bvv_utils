@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/belobragin/bvv_utils/goutils/config"
-	"github.com/belobragin/bvv_utils/goutils/database"
 
 	"go.uber.org/zap"
 )
@@ -16,7 +15,6 @@ const (
 
 type StandardUseCaseI interface {
 	GetDebug() bool
-	GetDb() *database.ProjectPsqlDb
 	GetLog() *zap.Logger
 	GetApiPort() string
 	GetMetricPort() string
@@ -33,9 +31,9 @@ type StandardUseCaseI interface {
 }
 
 type StandardUseCaseRealization struct {
-	log         *zap.Logger
-	debug       bool
-	db          *database.ProjectPsqlDb
+	log   *zap.Logger
+	debug bool
+	// db          *database.ProjectPsqlDb
 	errC        chan error
 	serviceName string
 	apiPort     string
@@ -48,9 +46,9 @@ type StandardUseCaseRealization struct {
 	MetricRouter http.Handler
 }
 
-func (s *StandardUseCaseRealization) GetDb() *database.ProjectPsqlDb {
-	return s.db
-}
+// func (s *StandardUseCaseRealization) GetDb() *database.ProjectPsqlDb {
+// 	return s.db
+// }
 
 func (s *StandardUseCaseRealization) GetDebug() bool {
 	return s.debug

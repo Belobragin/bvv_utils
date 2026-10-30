@@ -90,24 +90,6 @@ func (s *StandardUseCaseRealization) GetMetricRouter() http.Handler {
 	return s.MetricRouter
 }
 
-// run server:
-func (s *StandardUseCaseRealization) NewApiServer() *http.Server {
-	return &http.Server{
-		Addr:              ":" + s.GetApiPort(),
-		ReadHeaderTimeout: ServerReadHeaderTimeout,
-		Handler:           s.GetAppRouter(),
-	}
-}
-
-// run prometheus metrics server:
-func (s *StandardUseCaseRealization) NewMetricServer() *http.Server {
-	return &http.Server{
-		Addr:              ":" + s.GetMetricPort(),
-		ReadHeaderTimeout: ServerReadHeaderTimeout,
-		Handler:           s.GetMetricRouter(),
-	}
-}
-
 func NewStandardUseCase(
 	c config.StandardConfigI,
 	serviceName string,

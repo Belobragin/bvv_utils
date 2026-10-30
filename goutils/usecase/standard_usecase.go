@@ -113,7 +113,6 @@ func NewStandardUseCase(
 	serviceName string,
 	l *zap.Logger,
 	ec chan error,
-	projectErrMap map[error]int,
 ) (*StandardUseCaseRealization, error) {
 	var u = new(StandardUseCaseRealization)
 	u.log = l
@@ -124,7 +123,6 @@ func NewStandardUseCase(
 	u.metricPort = c.GetMetricPort()
 	u.allStopChan = make(chan struct{}, 1)
 	u.errMap = make(map[error]int)
-	u.errMap = projectErrMap
 	return u, nil
 }
 

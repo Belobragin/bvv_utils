@@ -31,9 +31,8 @@ type StandardUseCaseI interface {
 }
 
 type StandardUseCaseRealization struct {
-	log   *zap.Logger
-	debug bool
-	// db          *database.ProjectPsqlDb
+	log         *zap.Logger
+	debug       bool
 	errC        chan error
 	serviceName string
 	apiPort     string
@@ -45,10 +44,6 @@ type StandardUseCaseRealization struct {
 	// MetricRouter value is set in each project
 	MetricRouter http.Handler
 }
-
-// func (s *StandardUseCaseRealization) GetDb() *database.ProjectPsqlDb {
-// 	return s.db
-// }
 
 func (s *StandardUseCaseRealization) GetDebug() bool {
 	return s.debug

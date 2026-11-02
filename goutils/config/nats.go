@@ -81,23 +81,6 @@ func (r *BrokerConfigStatic) GetPublishSubject() string {
 	return r.Broker.PublishSubject
 }
 
-// func ConnectToNats(n BrokerConfigI) (*nats.Conn, error) {
-// 	var (
-// 		uri  = n.GetUri()
-// 		name = n.GetName()
-// 	)
-// 	if uri == "" {
-// 		return nil, mistake.ErrNatsUriAbsent
-// 	}
-// 	if name == "" {
-// 		return nil, mistake.ErrNatsClientNameAbsent
-// 	}
-// 	if n.GetUser() != "" && n.GetPassw() != "" {
-// 		return nats.Connect(uri, nats.Name(name), nats.UserInfo(n.GetUser(), n.GetPassw()))
-// 	}
-// 	return nats.Connect(uri, nats.Name(name))
-// }
-
 type NatsConfig struct {
 	Nats struct {
 		URI  string `conf:"env:NATS_ADDRESS"`

@@ -1,10 +1,14 @@
 package abroker
 
 import (
+	"time"
+
 	"github.com/belobragin/bvv_utils/goutils/mistake"
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
+
+const publishFlushTimeout = 3 * time.Second
 
 type NatsMsg struct {
 	msg *nats.Msg
@@ -39,8 +43,18 @@ type NatsBroker struct {
 	InputMsgFoo nats.MsgHandler //func(msg *nats.Msg)
 }
 
-func (n *NatsBroker) PublishEvent(m []byte) {
-	n.conn.Publish(n.publishSubject, m)
+func (n *NatsBroker) GetConn() *nats.Conn {
+	return n.conn
+}
+func (n *NatsBroker) GetPublishSubject() string {
+	return n.publishSubject
+}
+func (n *NatsBroker) PublishEvent(data []byte) error {
+	conn := n.GetConn()
+	if err := conn.Publish(n.GetPublishSubject(), data); err != nil {
+		return err
+	}
+	return conn.FlushTimeout(publishFlushTimeout)
 }
 func (n *NatsBroker) CloseBroker() error {
 	n.conn.Drain()
@@ -90,8 +104,6 @@ func NewNatsBroker(uri, name, portListen, portMetrics, user, psw string,
 		}
 	}
 	nb.logger = w
-	// natsDsn := fmt.Sprintf("nats://%s:%s@%s:%s", user, psw, addr, portListen)
-	// nb.conn, err = nats.Connect(natsDsn)
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +112,4 @@ func NewNatsBroker(uri, name, portListen, portMetrics, user, psw string,
 	nb.InputMsgFoo = inputMsgFoo
 
 	return nb, nil
-}
-
-func (nb *NatsBroker) GetConn() *nats.Conn {
-	return nb.conn
-}
-func (nb *NatsBroker) GetPublishSubject() string {
-	return nb.publishSubject
 }

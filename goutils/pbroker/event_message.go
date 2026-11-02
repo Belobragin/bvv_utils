@@ -15,11 +15,6 @@ type InputEvent struct {
 func (i *InputEvent) GetEventMessageKey() *uint8 {
 	return i.Key
 }
-
-// func (i *InputEvent) GetValue() interface{} {
-// 	return i.Value
-// }
-
 func (i *InputEvent) GetValue() map[string]interface{} {
 	return i.Value
 }

@@ -3,6 +3,8 @@ abroker is general interface and instruments for event-driving architecture
 */
 package abroker
 
+import "github.com/nats-io/nats.go"
+
 type AllMessageI interface {
 	GetData() []byte
 	GetKey() string
@@ -10,17 +12,9 @@ type AllMessageI interface {
 }
 
 type AllBrokerI interface {
-	PublishEvent([]byte)
+	GetConn() *nats.Conn
+	GetPublishSubject() string
+	PublishEvent([]byte) error
 	ListenEvent(chan error, chan struct{})
 	CloseBroker() error
 }
-
-// type MessageProcessFoo func(context.Context, EventMessageI) mistake.OutErr
-
-// type EventListenerI interface {
-// 	ListenEvent() error
-// }
-
-// type HandleEventI interface {
-// 	ProcessEvent(EventMessageI) (MessageProcessFoo, error)
-// }

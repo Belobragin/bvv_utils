@@ -43,18 +43,15 @@ type NatsBroker struct {
 	InputMsgFoo nats.MsgHandler //func(msg *nats.Msg)
 }
 
-func (n *NatsBroker) GetConn() *nats.Conn {
-	return n.conn
-}
 func (n *NatsBroker) GetPublishSubject() string {
 	return n.publishSubject
 }
 func (n *NatsBroker) PublishEvent(data []byte) error {
-	conn := n.GetConn()
-	if err := conn.Publish(n.GetPublishSubject(), data); err != nil {
+
+	if err := n.conn.Publish(n.GetPublishSubject(), data); err != nil {
 		return err
 	}
-	return conn.FlushTimeout(publishFlushTimeout)
+	return n.conn.FlushTimeout(publishFlushTimeout)
 }
 func (n *NatsBroker) CloseBroker() error {
 	n.conn.Drain()

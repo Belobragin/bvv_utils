@@ -5,80 +5,89 @@ type BrokerConfigI interface {
 	GetNatsName() string
 	GetNatsUser() string
 	GetNatsPassw() string
+	ValidateBrokerConfig() error
 }
 
 type BrokerConfig struct {
-	Broker struct {
-		URI        string `conf:"env:NATS_ADDRESS"`
-		Name       string `conf:"env:NATS_CLIENT_NAME"`
-		Port       string `conf:"env:NATS_PORT"`
-		MetricPort string `conf:"env:NATS_METRIC_PORT"`
-		User       string `conf:"env:BROKER_AUTH_NAME"`
-		Psw        string `conf:"env:BROKER_PSW"`
-	}
+	URI        string `conf:"env:NATS_ADDRESS"`
+	Name       string `conf:"env:NATS_CLIENT_NAME"`
+	Port       string `conf:"env:NATS_PORT"`
+	MetricPort string `conf:"env:NATS_METRIC_PORT"`
+	User       string `conf:"env:BROKER_AUTH_NAME"`
+	Psw        string `conf:"env:BROKER_PSW"`
 }
 
 func (r *BrokerConfig) GetNatsUri() string {
-	return r.Broker.URI
+	return r.URI
 }
 func (r *BrokerConfig) GetNatsPort() string {
-	return r.Broker.Port
+	return r.Port
 }
 func (r *BrokerConfig) GetNatsMetricPort() string {
-	return r.Broker.Port
+	return r.Port
 }
 func (r *BrokerConfig) GetNatsName() string {
-	return r.Broker.Name
+	return r.Name
 }
 func (r *BrokerConfig) GetNatsPsw() string {
-	return r.Broker.Psw
+	return r.Psw
 }
 func (r *BrokerConfig) GetNatsUser() string {
-	return r.Broker.User
+	return r.User
 }
 func (r *BrokerConfig) ValidateBrokerConfig() error {
 	return nil
 }
 
+type BrokerConfigStaticI interface {
+	GetNatsUri() string
+	GetNatsName() string
+	GetNatsUser() string
+	GetNatsPsw() string
+	ValidateBrokerConfig() error
+	GetNatsPort() string
+	GetNatsMetricPort() string
+	GetListenSubject() string
+	GetPublishSubject() string
+}
+
 type BrokerConfigStatic struct {
-	Broker struct {
-		URI            string `conf:"env:NATS_ADDRESS"`
-		Name           string `conf:"env:NATS_CLIENT_NAME"`
-		Port           string `conf:"env:NATS_PORT"`
-		MetricPort     string `conf:"env:NATS_METRIC_PORT"`
-		User           string `conf:"env:BROKER_AUTH_NAME"`
-		Psw            string `conf:"env:BROKER_PSW"`
-		ListenSubject  string `conf:"env:NATS_FROM_ALTERED_CHAN"`
-		PublishSubject string `conf:"env:NATS_FOR_PROCESSING_CHAN"`
-	}
+	URI            string `conf:"env:NATS_ADDRESS"`
+	Name           string `conf:"env:NATS_CLIENT_NAME"`
+	Port           string `conf:"env:NATS_PORT"`
+	MetricPort     string `conf:"env:NATS_METRIC_PORT"`
+	User           string `conf:"env:BROKER_AUTH_NAME"`
+	Psw            string `conf:"env:BROKER_PSW"`
+	ListenSubject  string `conf:"env:NATS_FROM_ALTERED_CHAN"`
+	PublishSubject string `conf:"env:NATS_FOR_PROCESSING_CHAN"`
 }
 
 func (r *BrokerConfigStatic) GetNatsUri() string {
-	return r.Broker.URI
+	return r.URI
 }
 func (r *BrokerConfigStatic) GetNatsPort() string {
-	return r.Broker.Port
+	return r.Port
 }
 func (r *BrokerConfigStatic) GetNatsMetricPort() string {
-	return r.Broker.Port
+	return r.MetricPort
 }
 func (r *BrokerConfigStatic) GetNatsName() string {
-	return r.Broker.Name
+	return r.Name
 }
 func (r *BrokerConfigStatic) GetNatsPsw() string {
-	return r.Broker.Psw
+	return r.Psw
 }
 func (r *BrokerConfigStatic) GetNatsUser() string {
-	return r.Broker.User
+	return r.User
 }
 func (r *BrokerConfigStatic) ValidateBrokerConfig() error {
 	return nil
 }
 func (r *BrokerConfigStatic) GetListenSubject() string {
-	return r.Broker.ListenSubject
+	return r.ListenSubject
 }
 func (r *BrokerConfigStatic) GetPublishSubject() string {
-	return r.Broker.PublishSubject
+	return r.PublishSubject
 }
 
 type NatsConfig struct {

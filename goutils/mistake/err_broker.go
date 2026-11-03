@@ -14,4 +14,6 @@ var (
 	ErrNoEventApiKeyData            = errors.New("no event api key for the route")
 	ErrMessageTypeUnknown           = errors.New("message type unknown")
 	ErrSubscribeData                = errors.New("nats server connection data invalid")
+	ErrAwsStackNotFound             = errors.New("aws cloudformation stack does not exist")
+	ErrAwsStackOutputNotFound       = errors.New("aws cloudformation stack output not found")
 )

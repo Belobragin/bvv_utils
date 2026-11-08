@@ -23,7 +23,7 @@ type StandardConfig struct {
 		Dsn string `conf:"mask,env:DB_DSN"`
 	}
 	/* LogLevel can be:
-	 "DEBUG", "WARN", "ERROR", "PANIC", "DPANIC", "FATAL"
+	 "DEBUG", "WARN", "INFO", "ERROR", "PANIC", "DPANIC", "FATAL"
 	- goto https://pkg.go.dev/go.uber.org/zap#pkg-constants
 	*/
 	LogLevel string `conf:"default:INFO,env:LOGGER_LEVEL"`

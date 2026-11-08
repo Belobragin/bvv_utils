@@ -45,7 +45,7 @@ func (c *StandardConfig) ValidateStandardConfig() error {
 	} else if i < 1001 || i > 64000 {
 		return mistake.ErrIncorrectApiPortValue
 	}
-	if !slices.Contains([]string{"DEBUG", "WARN", "ERROR", "PANIC", "DPANIC", "FATAL"}, c.GetLogLevel()) {
+	if !slices.Contains([]string{"DEBUG", "WARN", "INFO", "ERROR", "PANIC", "DPANIC", "FATAL"}, c.GetLogLevel()) {
 		return mistake.ErrIncorrectLogLevel
 	}
 	return nil
